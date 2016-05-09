@@ -39,4 +39,6 @@ gpgcheck=1
 EOF
 
 
-yum makecache
+#yum makecache
+yum clean all
+yum list
