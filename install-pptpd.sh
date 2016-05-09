@@ -42,8 +42,14 @@ sysctl -p # 使内核转发生效
 
 #
 iptables -A FORWARD -p tcp --syn -s 10.0.0.0/24 -j TCPMSS --set-mss 1356
-#iptables -t nat -A POSTROUTING -s 172.16.36.0/24 -j SNAT --to-source `ifconfig | grep 'inet' | grep 'netmask' | grep 'broadcast' | grep -v '127.0.0.1' | cut -d: -f2 | awk 'NR==1 {print $2}'`
 iptables -t nat -A POSTROUTING -s 10.0.0.0/24 -o eth0 -j MASQUERADE
+
+#iptables -t nat -A POSTROUTING -s 172.16.36.0/24 -j SNAT --to-source `ifconfig | grep 'inet' | grep 'netmask' | grep 'broadcast' | grep -v '127.0.0.1' | cut -d: -f2 | awk 'NR==1 {print $2}'`
+
+iptables -A INPUT -p tcp  --dport 1723 -j ACCEPT
+iptables -A INPUT -m state --state RELATED,ESTABLISHED -j ACCEPT
+iptables -A INPUT -p gre -j ACCEPT
+iptables -A OUTPUT  -p gre -j ACCEPT
 /usr/libexec/iptables/iptables.init save
 
 mknod /dev/ppp c 108 0
@@ -57,8 +63,8 @@ mknod /dev/ppp c 108 0
 #echo "iptables -A INPUT -p gre -j ACCEPT" >> /etc/rc.local
 #echo "iptables -A OUTPUT  -p gre -j ACCEPT" >> /etc/rc.local
 #
-#echo "iptables -A FORWARD -p tcp --syn -s 192.168.0.0/24 -j TCPMSS --set-mss 1356" >> /etc/rc.local
-#echo "iptables -t nat -A POSTROUTING -s 192.168.0.0/24 -o eth0 -j MASQUERADE" >> /etc/rc.local
+#echo "iptables -A FORWARD -p tcp --syn -s 10.0.0.0/24 -j TCPMSS --set-mss 1356" >> /etc/rc.local
+#echo "iptables -t nat -A POSTROUTING -s 10.0.0.0/24 -o eth0 -j MASQUERADE" >> /etc/rc.local
 
 systemctl restart iptables
 systemctl restart pptpd
